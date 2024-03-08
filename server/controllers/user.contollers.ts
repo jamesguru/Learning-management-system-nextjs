@@ -7,6 +7,7 @@ import jwt, { Secret } from "jsonwebtoken";
 import ejs from "ejs";
 import path from "path";
 import sendMail from "../utils/sendMail";
+import { sendToken } from "../utils/jwt";
 
 //Register user
 
@@ -141,6 +142,7 @@ export const loginUser = CatchAsyncError(
       if (!email || !password) {
         return next(new ErrorHandler("Please enter email and password", 400));
       }
+
       const user = await userModel.findOne({ email }).select("+password");
       if (!user) {
         return next(new ErrorHandler("Invalid email or password", 400));
@@ -150,8 +152,11 @@ export const loginUser = CatchAsyncError(
       if (!isPasswordMatch) {
         return next(new ErrorHandler("Invalid email or passoword", 400));
       }
+
+      sendToken(user, 200, res)
     } catch (error: any) {
       return next(new ErrorHandler(error.message, 400));
     }
+
   }
 );
